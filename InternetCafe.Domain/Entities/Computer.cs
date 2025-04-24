@@ -13,7 +13,6 @@ namespace InternetCafe.Domain.Entities
         public int Id { get; set; }
         public string Name { get; set; } = null!;
         public string IPAddress { get; set; } = null!;
-        public string MACAddress { get; set; } = null!;
         public string Specifications { get; set; } = null!;
         public string Location { get; set; } = null!;
         public ComputerStatus Status { get; set; } = ComputerStatus.Available;

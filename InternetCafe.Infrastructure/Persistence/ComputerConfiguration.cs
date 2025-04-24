@@ -26,9 +26,6 @@ namespace InternetCafe.Infrastructure.Persistence
             entity.Property(e => e.IPAddress).IsRequired().HasMaxLength(15);
             entity.HasIndex(e => e.IPAddress).IsUnique();
 
-            entity.Property(e => e.MACAddress).IsRequired().HasMaxLength(17);
-            entity.HasIndex(e => e.MACAddress).IsUnique();
-
             entity.Property(e => e.Specifications).IsRequired();
             entity.Property(e => e.Location).IsRequired().HasMaxLength(100);
 
