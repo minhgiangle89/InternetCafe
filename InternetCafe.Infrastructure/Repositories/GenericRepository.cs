@@ -1,6 +1,6 @@
 ﻿using InternetCafe.Domain.Entities;
 using InternetCafe.Domain.Interfaces.Repositories;
-using InternetCafe.Infrastructure.Persistence;
+using InternetCafe.Infrastructure.DBContext;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

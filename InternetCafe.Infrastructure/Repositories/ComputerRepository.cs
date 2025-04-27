@@ -1,7 +1,7 @@
 ﻿using InternetCafe.Domain.Entities;
 using InternetCafe.Domain.Enums;
 using InternetCafe.Domain.Interfaces.Repositories;
-using InternetCafe.Infrastructure.Persistence;
+using InternetCafe.Infrastructure.DBContext;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;

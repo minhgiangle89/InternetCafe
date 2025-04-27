@@ -9,11 +9,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="8.1.1" />
   </ItemGroup>
 
   <ItemGroup>
+	  <ProjectReference Include="..\InternetCafe.Domain\InternetCafe.Domain.csproj" />
+	  <ProjectReference Include="..\InternetCafe.Infrastructure\InternetCafe.Infrastructure.csproj" />
     <Folder Include="Controllers\" />
   </ItemGroup>
 

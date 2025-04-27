@@ -3,7 +3,7 @@ using InternetCafe.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
-namespace InternetCafe.Infrastructure.Persistence
+namespace InternetCafe.Infrastructure.DBContext
 {
     public class ApplicationDbContext : DbContext
     {
@@ -24,7 +24,7 @@ namespace InternetCafe.Infrastructure.Persistence
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        
+
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

@@ -1,5 +1,6 @@
 ﻿using InternetCafe.Domain.Interfaces;
 using InternetCafe.Domain.Interfaces.Repositories;
+using InternetCafe.Infrastructure.DBContext;
 using InternetCafe.Infrastructure.Identity;
 using InternetCafe.Infrastructure.Persistence;
 using InternetCafe.Infrastructure.Repositories;
