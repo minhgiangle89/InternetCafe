@@ -13,7 +13,7 @@ namespace InternetCafe.Domain.Entities
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
         public DateTime DateOfBirth { get; set; }
-        public UserRole Role { get; set; } = UserRole.Customer;
+        public int Role { get; set; } = (int)UserRole.Customer;
         public UserStatus Status { get; set; } = UserStatus.Active;
         public DateTime LastLoginTime { get; set; }
 

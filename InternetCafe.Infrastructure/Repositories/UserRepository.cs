@@ -34,7 +34,7 @@ namespace InternetCafe.Infrastructure.Repositories
         public async Task<IReadOnlyList<User>> GetUsersByRoleAsync(UserRole role)
         {
             return await _dbSet
-                .Where(u => u.Role == role)
+                .Where(u => u.Role == (int)role)
                 .ToListAsync();
         }
     }

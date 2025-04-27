@@ -7,17 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+	  <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />	  		  
+	  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-    <Folder Include="Identity\" />
+	  <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
     <Folder Include="Logging\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\InternetCafe.Application\InternetCafe.Application.csproj" />
     <ProjectReference Include="..\InternetCafe.Domain\InternetCafe.Domain.csproj" />
   </ItemGroup>
 
