@@ -36,12 +36,12 @@ namespace InternetCafe.Infrastructure.Persistence
             entity.HasOne(t => t.User)
                 .WithMany(u => u.Transactions)
                 .HasForeignKey(t => t.UserId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.NoAction);
 
             entity.HasOne(t => t.Session)
                 .WithMany(s => s.Transactions)
                 .HasForeignKey(t => t.SessionId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.NoAction);
 
         }
     }

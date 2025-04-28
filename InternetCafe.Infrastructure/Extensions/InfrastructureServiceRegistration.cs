@@ -1,9 +1,11 @@
 ﻿using InternetCafe.Domain.Interfaces;
 using InternetCafe.Domain.Interfaces.Repositories;
+using InternetCafe.Domain.Interfaces.Services;
 using InternetCafe.Infrastructure.DBContext;
 using InternetCafe.Infrastructure.Identity;
 using InternetCafe.Infrastructure.Persistence;
 using InternetCafe.Infrastructure.Repositories;
+using InternetCafe.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,7 +40,8 @@ namespace InternetCafe.Infrastructure.Extensions
             // Identity and Authentication
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
-            services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
 
             return services;
         }
