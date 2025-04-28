@@ -31,6 +31,8 @@ namespace InternetCafe.Infrastructure.Identity
 
         public int TokenExpirationInMinutes => _settings.TokenExpirationInMinutes;
 
+        public int RefreshTokenExpirationInDays => _settings.RefreshTokenExpirationInDays;
+
         public string GenerateAccessToken(User user)
         {
             try
