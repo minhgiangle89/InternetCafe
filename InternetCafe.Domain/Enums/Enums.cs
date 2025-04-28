@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace InternetCafe.Domain.Enums
 {
+    public enum Status
+    {
+        Active = 1,
+        Cancelled = 2
+    }
+
     public enum UserRole
     {
         Customer = 0,

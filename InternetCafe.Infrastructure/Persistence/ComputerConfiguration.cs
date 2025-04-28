@@ -29,15 +29,14 @@ namespace InternetCafe.Infrastructure.Persistence
             entity.Property(e => e.Specifications).IsRequired();
             entity.Property(e => e.Location).IsRequired().HasMaxLength(100);
 
-            entity.Property(e => e.Status).HasConversion<string>();
+            entity.Property(e => e.ComputerStatus).HasColumnType("int");
 
             entity.Property(e => e.HourlyRate).HasColumnType("decimal(18,2)");
 
             // Relationships
             entity.HasMany(c => c.Sessions)
                 .WithOne(s => s.Computer)
-                .HasForeignKey(s => s.ComputerId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey(s => s.ComputerId);
 
         }
     }

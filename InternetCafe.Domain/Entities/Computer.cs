@@ -11,11 +11,11 @@ namespace InternetCafe.Domain.Entities
     public class Computer : BaseEntity
     {
         public int Id { get; set; }
-        public string Name { get; set; } = null!;
-        public string IPAddress { get; set; } = null!;
-        public string Specifications { get; set; } = null!;
+        public string Name { get; set; }
+        public string IPAddress { get; set; }
+        public string Specifications { get; set; } 
         public string Location { get; set; } = null!;
-        public ComputerStatus Status { get; set; } = ComputerStatus.Available;
+        public int ComputerStatus { get; set; } = 1;
         public decimal HourlyRate { get; set; }
         public DateTime? LastMaintenanceDate { get; set; }
         public DateTime? LastUsedDate { get; set; }

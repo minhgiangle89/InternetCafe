@@ -30,19 +30,15 @@ namespace InternetCafe.Infrastructure.Persistence
             // Relationships
             entity.HasOne(t => t.Account)
                 .WithMany(a => a.Transactions)
-                .HasForeignKey(t => t.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(t => t.AccountId);
 
             entity.HasOne(t => t.User)
                 .WithMany(u => u.Transactions)
-                .HasForeignKey(t => t.UserId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(t => t.UserId);
 
             entity.HasOne(t => t.Session)
                 .WithMany(s => s.Transactions)
-                .HasForeignKey(t => t.SessionId)
-                .OnDelete(DeleteBehavior.NoAction);
-
+                .HasForeignKey(t => t.SessionId);
         }
     }
 }

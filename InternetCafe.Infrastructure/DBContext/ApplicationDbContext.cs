@@ -1,4 +1,5 @@
 ﻿using InternetCafe.Domain.Entities;
+using InternetCafe.Domain.Enums;
 using InternetCafe.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -54,6 +55,7 @@ namespace InternetCafe.Infrastructure.DBContext
                         entry.Entity.Creation_EmpId = _currentUserService.UserId ?? 0;
                         entry.Entity.LastUpdated_Timestamp = now;
                         entry.Entity.LastUpdated_EmpId = _currentUserService.UserId ?? 0;
+                        entry.Entity.Status = (int)Status.Active;
                         break;
 
                     case EntityState.Modified:
@@ -62,6 +64,12 @@ namespace InternetCafe.Infrastructure.DBContext
 
                         entry.Property(x => x.Creation_Timestamp).IsModified = false;
                         entry.Property(x => x.Creation_EmpId).IsModified = false;
+                        break;
+                    case EntityState.Deleted:
+                        entry.State = EntityState.Modified;
+                        entry.Entity.Status = (int)Status.Cancelled;
+                        entry.Entity.LastUpdated_Timestamp = now;
+                        entry.Entity.LastUpdated_EmpId = _currentUserService.UserId ?? 0;
                         break;
                 }
             }

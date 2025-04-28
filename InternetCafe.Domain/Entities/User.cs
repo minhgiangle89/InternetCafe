@@ -14,7 +14,6 @@ namespace InternetCafe.Domain.Entities
         public string? Address { get; set; }
         public DateTime DateOfBirth { get; set; }
         public int Role { get; set; } = (int)UserRole.Customer;
-        public UserStatus Status { get; set; } = UserStatus.Active;
         public DateTime LastLoginTime { get; set; }
 
         // Navigation properties

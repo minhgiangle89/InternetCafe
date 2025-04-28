@@ -24,20 +24,9 @@ namespace InternetCafe.Infrastructure.Persistence
             entity.Property(e => e.Notes).HasMaxLength(500);
 
             // Relationships
-            entity.HasOne(s => s.User)
-                .WithMany(u => u.Sessions)
-                .HasForeignKey(s => s.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(s => s.Computer)
-                .WithMany(c => c.Sessions)
-                .HasForeignKey(s => s.ComputerId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             entity.HasMany(s => s.Transactions)
-                .WithOne(t => t.Session)
-                .HasForeignKey(t => t.SessionId)
-                .OnDelete(DeleteBehavior.SetNull);
+             .WithOne(t => t.Session)
+             .HasForeignKey(t => t.SessionId);
         }
     }
 }

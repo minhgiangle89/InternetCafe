@@ -20,13 +20,11 @@ namespace InternetCafe.Infrastructure.Persistence
             // Relationships
             entity.HasOne(a => a.User)
                 .WithOne(u => u.Account)
-                .HasForeignKey<Account>(a => a.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey<Account>(a => a.UserId);
 
             entity.HasMany(a => a.Transactions)
                 .WithOne(t => t.Account)
-                .HasForeignKey(t => t.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(t => t.AccountId);
 
         }
     }

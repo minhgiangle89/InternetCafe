@@ -57,7 +57,7 @@ namespace InternetCafe.Infrastructure.Persistence
                     Address = "Internet Cafe Office",
                     DateOfBirth = new DateTime(1990, 1, 1),
                     Role = (int)UserRole.Admin,
-                    Status = UserStatus.Active,
+                    Status = (int)UserStatus.Active,
                     LastLoginTime = DateTime.Now,
                     Creation_Timestamp = DateTime.Now,
                     Creation_EmpId = 1,
@@ -98,7 +98,7 @@ namespace InternetCafe.Infrastructure.Persistence
                         IPAddress = $"192.168.1.{i + 100}",
                         Specifications = "Intel Core i5, 16GB RAM, 512GB SSD, NVIDIA GTX 1660",
                         Location = $"Station {i}",
-                        Status = ComputerStatus.Available,
+                        Status = (int)ComputerStatus.Available,
                         HourlyRate = 10000, // 10,000 VND per hour
                         LastMaintenanceDate = DateTime.Now,
                         Creation_Timestamp = DateTime.Now,

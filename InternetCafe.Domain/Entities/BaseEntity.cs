@@ -12,5 +12,6 @@ namespace InternetCafe.Domain.Entities
         public int Creation_EmpId { get; set; }
         public DateTime LastUpdated_Timestamp { get; set; }
         public int LastUpdated_EmpId { get; set; }
+        public int Status { get; set; } = 1; 
     }
 }

@@ -31,8 +31,7 @@ namespace InternetCafe.Infrastructure.Persistence
             // Relationships
             modelBuilder.HasOne(u => u.Account)
                     .WithOne(a => a.User)
-                    .HasForeignKey<Account>(a => a.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .HasForeignKey<Account>(a => a.UserId);
         }
     }
 }
