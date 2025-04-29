@@ -1,8 +1,8 @@
-﻿using InternetCafe.Domain.Interfaces.Repositories;
+﻿using InternetCafe.Application.Interfaces.Repositories;
 using System;
 using System.Threading.Tasks;
 
-namespace InternetCafe.Domain.Interfaces
+namespace InternetCafe.Application.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {

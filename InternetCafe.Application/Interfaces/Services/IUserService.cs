@@ -2,7 +2,7 @@
 using InternetCafe.Domain.Enums;
 using System.Threading.Tasks;
 
-namespace InternetCafe.Domain.Interfaces.Services
+namespace InternetCafe.Application.Interfaces.Services
 {
     public interface IUserService
     {

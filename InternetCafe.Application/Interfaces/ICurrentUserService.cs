@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InternetCafe.Domain.Interfaces
+namespace InternetCafe.Application.Interfaces
 {
     public interface ICurrentUserService
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace InternetCafe.Domain.Interfaces.Services
+namespace InternetCafe.Application.Interfaces.Services
 {
     public interface IStatisticsService
     {

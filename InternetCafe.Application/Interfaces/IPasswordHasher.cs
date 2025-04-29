@@ -1,4 +1,4 @@
-﻿namespace InternetCafe.Domain.Interfaces
+﻿namespace InternetCafe.Application.Interfaces
 {
     public interface IPasswordHasher
     {

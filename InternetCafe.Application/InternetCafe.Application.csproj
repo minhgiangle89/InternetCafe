@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\" />
     <Folder Include="Commands\" />
     <Folder Include="Mappings\" />
     <Folder Include="Validators\" />
@@ -27,5 +26,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.4" />
   </ItemGroup>
-
+	<ItemGroup>
+		<ProjectReference Include="..\InternetCafe.Domain\InternetCafe.Domain.csproj" />
+	</ItemGroup>
 </Project>

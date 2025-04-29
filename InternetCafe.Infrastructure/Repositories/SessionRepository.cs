@@ -1,6 +1,6 @@
 ﻿using InternetCafe.Domain.Entities;
 using InternetCafe.Domain.Enums;
-using InternetCafe.Domain.Interfaces.Repositories;
+using InternetCafe.Application.Interfaces.Repositories;
 using InternetCafe.Infrastructure.DBContext;
 using Microsoft.EntityFrameworkCore;
 using System;

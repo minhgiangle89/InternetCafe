@@ -1,4 +1,4 @@
-﻿using InternetCafe.Domain.Interfaces;
+﻿using InternetCafe.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;

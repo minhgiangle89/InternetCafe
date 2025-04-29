@@ -3,7 +3,7 @@ using InternetCafe.Domain.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace InternetCafe.Domain.Interfaces.Services
+namespace InternetCafe.Application.Interfaces.Services
 {
     public interface IComputerService
     {

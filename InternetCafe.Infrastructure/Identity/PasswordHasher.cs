@@ -1,4 +1,4 @@
-﻿using InternetCafe.Domain.Interfaces;
+﻿using InternetCafe.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Security.Cryptography;

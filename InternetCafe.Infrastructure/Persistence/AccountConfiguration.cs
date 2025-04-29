@@ -1,5 +1,5 @@
 ﻿using InternetCafe.Domain.Entities;
-using InternetCafe.Domain.Interfaces;
+using InternetCafe.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

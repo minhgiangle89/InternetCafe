@@ -1,4 +1,4 @@
-﻿using InternetCafe.Domain.Interfaces;
+﻿using InternetCafe.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Security.Claims;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace InternetCafe.Domain.Interfaces
+namespace InternetCafe.Application.Interfaces
 {
     public interface IAuditLogger
     {

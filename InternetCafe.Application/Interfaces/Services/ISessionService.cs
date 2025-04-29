@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace InternetCafe.Domain.Interfaces.Services
+namespace InternetCafe.Application.Interfaces.Services
 {
     public interface ISessionService
     {

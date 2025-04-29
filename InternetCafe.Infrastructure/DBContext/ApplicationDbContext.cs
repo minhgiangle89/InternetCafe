@@ -1,6 +1,7 @@
 ﻿using InternetCafe.Domain.Entities;
 using InternetCafe.Domain.Enums;
-using InternetCafe.Domain.Interfaces;
+using InternetCafe.Application.Interfaces;
+using InternetCafe.Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 

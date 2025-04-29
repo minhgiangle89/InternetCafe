@@ -1,5 +1,5 @@
 ﻿using InternetCafe.Application.DTOs.Authentication.Models;
-using InternetCafe.Domain.Interfaces.Services;
+using InternetCafe.Application.Interfaces.Services;
 using InternetCafe.Infrastructure.Identity;
 using InternetCafe.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

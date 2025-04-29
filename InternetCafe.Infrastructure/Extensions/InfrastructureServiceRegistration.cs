@@ -1,11 +1,12 @@
-﻿using InternetCafe.Domain.Interfaces;
-using InternetCafe.Domain.Interfaces.Repositories;
-using InternetCafe.Domain.Interfaces.Services;
+﻿using InternetCafe.Application.Interfaces.Repositories;
+using InternetCafe.Application.Interfaces.Services;
+using InternetCafe.Application.Interfaces;
 using InternetCafe.Infrastructure.DBContext;
 using InternetCafe.Infrastructure.Identity;
 using InternetCafe.Infrastructure.Persistence;
 using InternetCafe.Infrastructure.Repositories;
 using InternetCafe.Infrastructure.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

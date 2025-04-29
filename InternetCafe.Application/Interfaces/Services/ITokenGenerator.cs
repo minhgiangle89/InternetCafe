@@ -6,7 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InternetCafe.Domain.Interfaces.Services
+namespace InternetCafe.Application.Interfaces.Services
 {
     public interface ITokenGenerator
     {

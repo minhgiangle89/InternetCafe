@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace InternetCafe.Domain.Interfaces.Repositories
+namespace InternetCafe.Application.Interfaces.Repositories
 {
     public interface ISessionRepository : IRepository<Session>
     {

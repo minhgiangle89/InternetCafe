@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace InternetCafe.Domain.Interfaces.Repositories
+namespace InternetCafe.Application.Interfaces.Repositories
 {
     public interface IRepository<T> where T : BaseEntity
     {

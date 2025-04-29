@@ -1,5 +1,5 @@
-﻿using InternetCafe.Domain.Interfaces;
-using InternetCafe.Domain.Interfaces.Repositories;
+﻿using InternetCafe.Application.Interfaces;
+using InternetCafe.Application.Interfaces.Repositories;
 using InternetCafe.Infrastructure.DBContext;
 using InternetCafe.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;

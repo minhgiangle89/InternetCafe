@@ -1,9 +1,9 @@
 ﻿using InternetCafe.Application.DTOs.Authentication.Models;
 using InternetCafe.Domain.Entities;
 using InternetCafe.Domain.Exceptions;
-using InternetCafe.Domain.Interfaces;
-using InternetCafe.Domain.Interfaces.Repositories;
-using InternetCafe.Domain.Interfaces.Services;
+using InternetCafe.Application.Interfaces;
+using InternetCafe.Application.Interfaces.Repositories;
+using InternetCafe.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
