@@ -3,6 +3,8 @@ using System.Reflection;
 using MediatR;
 using FluentValidation;
 using System;
+using InternetCafe.Application.Interfaces.Services;
+using InternetCafe.Application.Services;
 
 namespace InternetCafe.Application.Extensions
 {
@@ -15,6 +17,15 @@ namespace InternetCafe.Application.Extensions
 
             // Register AutoMapper
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+            // Register application services
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<ISessionService, SessionService>();
+            services.AddScoped<IComputerService, ComputerService>();
+            services.AddScoped<IStatisticsService, StatisticsService>();
+
             return services;
         }
     }

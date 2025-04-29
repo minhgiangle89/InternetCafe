@@ -14,7 +14,7 @@ namespace InternetCafe.Application.Interfaces.Services
         Task<IEnumerable<SessionDTO>> GetSessionsByUserIdAsync(int userId);
         Task<IEnumerable<SessionDTO>> GetSessionsByDateRangeAsync(DateTime startDate, DateTime endDate);
         Task<decimal> CalculateSessionCostAsync(int sessionId);
-        Task<decimal> CalculateSessionCostAsync(TimeSpan duration, decimal hourlyRate);
+        Task<double> CalculateSessionCostAsync(TimeSpan duration, double hourlyRate);
         Task<TimeSpan> GetRemainingTimeAsync(int userId, int computerId);
         Task<bool> HasActiveSessionAsync(int userId);
         Task<SessionDTO> TerminateSessionAsync(int sessionId, string reason);

@@ -8,10 +8,8 @@
 
   <ItemGroup>
     <Folder Include="Commands\" />
-    <Folder Include="Mappings\" />
     <Folder Include="Validators\" />
     <Folder Include="Queries\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
   <ItemGroup>
