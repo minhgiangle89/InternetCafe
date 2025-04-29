@@ -20,12 +20,14 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 // Register application services
 builder.Services.AddApplicationServices();
 
-// Register authentication services
-builder.Services.AddAuthenticationServices(builder.Configuration);
 
-// Configure Swagger/OpenAPI
+
+// Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Register authentication services
+builder.Services.AddAuthenticationServices(builder.Configuration);
 
 // Configure CORS
 builder.Services.AddCors(options =>

@@ -1,7 +1,7 @@
 ﻿using InternetCafe.Application.DTOs.Authentication.Models;
 using InternetCafe.Application.Interfaces.Services;
+using InternetCafe.Application.Services;
 using InternetCafe.Infrastructure.Identity;
-using InternetCafe.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -85,11 +85,6 @@ namespace InternetCafe.Infrastructure.Extensions
                             }
                         };
                     });
-
-            // Register services
-            services.AddScoped<IAuthenticationService, AuthenticationService>();
-            services.AddScoped<ITokenGenerator, TokenGenerator>();
-
             return services;
         }
     }

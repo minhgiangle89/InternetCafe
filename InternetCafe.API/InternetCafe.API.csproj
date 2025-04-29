@@ -20,7 +20,6 @@
   <ItemGroup>
 	  <ProjectReference Include="..\InternetCafe.Domain\InternetCafe.Domain.csproj" />
 	  <ProjectReference Include="..\InternetCafe.Infrastructure\InternetCafe.Infrastructure.csproj" />
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>

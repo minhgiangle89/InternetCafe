@@ -5,13 +5,13 @@ using InternetCafe.Infrastructure.DBContext;
 using InternetCafe.Infrastructure.Identity;
 using InternetCafe.Infrastructure.Persistence;
 using InternetCafe.Infrastructure.Repositories;
-using InternetCafe.Infrastructure.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using InternetCafe.Application.Services;
+using InternetCafe.Infrastructure.Logging;
 
 namespace InternetCafe.Infrastructure.Extensions
 {
@@ -42,6 +42,17 @@ namespace InternetCafe.Infrastructure.Extensions
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped<ITokenGenerator, TokenGenerator>();
+
+            // Logging
+            services.AddScoped<IAuditLogger, AuditLogger>();
+
+            // Register application services
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<ISessionService, SessionService>();
+            services.AddScoped<IComputerService, ComputerService>();
+            services.AddScoped<IStatisticsService, StatisticsService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
 
             return services;
