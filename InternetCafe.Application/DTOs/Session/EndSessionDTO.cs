@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace InternetCafe.Application.DTOs.Session
 {
-    public class EndSessionDto
+    public class EndSessionDTO
     {
         public int SessionId { get; set; }
         public string? Notes { get; set; }

@@ -1,18 +1,20 @@
-﻿using InternetCafe.Domain.Entities;
+﻿using InternetCafe.Application.DTOs.User;
 using InternetCafe.Domain.Enums;
-using System.Threading.Tasks;
+
 
 namespace InternetCafe.Application.Interfaces.Services
 {
     public interface IUserService
     {
-        Task<User> AuthenticateUserAsync(string username, string password);
-        Task<User> RegisterUserAsync(User user, string password);
-        Task UpdateUserAsync(User user);
-        Task<bool> CheckPasswordAsync(User user, string password);
-        Task ChangePasswordAsync(User user, string currentPassword, string newPassword);
+        Task<UserDTO> AuthenticateUserAsync(string username, string password);
+        Task<UserDTO> RegisterUserAsync(CreateUserDTO userDTO);
+        Task UpdateUserAsync(int userId, UpdateUserDTO userDTO);
+        Task<bool> CheckPasswordAsync(int userId, string password);
+        Task ChangePasswordAsync(int userId, ChangePasswordDTO changePasswordDTO);
         Task ChangeUserStatusAsync(int userId, UserStatus status);
-        Task<User> GetUserByIdAsync(int userId);
-        Task<User> GetUserByUsernameAsync(string username);
+        Task<UserDTO> GetUserByIdAsync(int userId);
+        Task<UserDetailsDTO> GetUserDetailsAsync(int userId);
+        Task<UserDTO> GetUserByUsernameAsync(string username);
+        Task<IEnumerable<UserDTO>> GetAllUsersAsync();
     }
 }

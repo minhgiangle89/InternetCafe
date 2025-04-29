@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace InternetCafe.Application.DTOs.User
 {
-    public class CreateUserDto
+    public class CreateUserDTO
     {
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;

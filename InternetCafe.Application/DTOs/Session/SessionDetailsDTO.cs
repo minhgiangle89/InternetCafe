@@ -2,7 +2,7 @@
 
 namespace InternetCafe.Application.DTOs.Session
 {
-    public class SessionDetailsDto : SessionDTO
+    public class SessionDetailsDTO : SessionDTO
     {
         public ICollection<TransactionDTO> Transactions { get; set; } = new List<TransactionDTO>();
     }

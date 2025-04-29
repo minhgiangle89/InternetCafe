@@ -1,19 +1,19 @@
-﻿using InternetCafe.Domain.Entities;
+﻿using InternetCafe.Application.DTOs.Computer;
 using InternetCafe.Domain.Enums;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace InternetCafe.Application.Interfaces.Services
 {
     public interface IComputerService
     {
-        Task<Computer> RegisterComputerAsync(Computer computer);
-        Task<List<Computer>> GetAvailableComputersAsync();
-        Task<Computer> GetComputerByIdAsync(int computerId);
-        Task SetComputerStatusAsync(int computerId, ComputerStatus status);
-        Task UpdateComputerAsync(Computer computer);
+        Task<ComputerDTO> RegisterComputerAsync(CreateComputerDTO computerDTO);
+        Task<IEnumerable<ComputerDTO>> GetAvailableComputersAsync();
+        Task<ComputerDTO> GetComputerByIdAsync(int computerId);
+        Task<ComputerDetailsDTO> GetComputerDetailsAsync(int computerId);
+        Task SetComputerStatusAsync(ComputerStatusUpdateDTO updateDTO);
+        Task<ComputerDTO> UpdateComputerAsync(int computerId, UpdateComputerDTO computerDTO);
         Task<bool> IsComputerAvailableAsync(int computerId);
         Task SetComputerMaintenanceAsync(int computerId, string reason);
-        Task<List<Computer>> GetComputersByStatusAsync(ComputerStatus status);
+        Task<IEnumerable<ComputerDTO>> GetComputersByStatusAsync(ComputerStatus status);
+        Task<IEnumerable<ComputerDTO>> GetAllComputersAsync();
     }
 }
