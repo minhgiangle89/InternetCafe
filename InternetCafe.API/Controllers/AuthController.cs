@@ -36,7 +36,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during login for user {Username}", request.Username);
+                _logger.LogError(ex, string.Format("Error during login for user {0}", request.Username));
                 return ex.Message.Contains("not found") ? NotFound(ex.Message) :
                        Unauthorized(new { Message = "Invalid credentials" });
             }

@@ -73,7 +73,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving session with ID {SessionId}", id);
+                _logger.LogError(ex, string.Format("Error retrieving session with ID {0}", id));
                 return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
                     StatusCode(500, new { Message = "An error occurred while retrieving session" });
             }
@@ -102,7 +102,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving sessions for user with ID {UserId}", userId);
+                _logger.LogError(ex, string.Format("Error retrieving sessions for user with ID {0}", userId));
                 return StatusCode(500, new { Message = "An error occurred while retrieving sessions" });
             }
         }
@@ -134,7 +134,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving active session for computer with ID {ComputerId}", computerId);
+                _logger.LogError(ex, string.Format("Error retrieving active session for computer with ID {0}", computerId));
                 return StatusCode(500, new { Message = "An error occurred while retrieving session" });
             }
         }
@@ -162,8 +162,8 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error starting session for user {UserId} on computer {ComputerId}",
-                    startSessionDTO.UserId, startSessionDTO.ComputerId);
+                _logger.LogError(ex, string.Format("Error starting session for user {0} on computer {1}",
+                    startSessionDTO.UserId, startSessionDTO.ComputerId));
 
                 if (ex.Message.Contains("not found"))
                     return NotFound(new { Message = ex.Message });
@@ -205,7 +205,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error ending session with ID {SessionId}", endSessionDTO.SessionId);
+                _logger.LogError(ex, string.Format("Error ending session with ID {0}", endSessionDTO.SessionId));
 
                 if (ex.Message.Contains("not found"))
                     return NotFound(new { Message = ex.Message });
@@ -232,7 +232,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error terminating session with ID {SessionId}", id);
+                _logger.LogError(ex, string.Format("Error terminating session with ID {0}", id));
 
                 if (ex.Message.Contains("not found"))
                     return NotFound(new { Message = ex.Message });
@@ -269,7 +269,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error calculating cost for session with ID {SessionId}", id);
+                _logger.LogError(ex, string.Format("Error calculating cost for session with ID {0}", id));
 
                 if (ex.Message.Contains("not found"))
                     return NotFound(new { Message = ex.Message });
@@ -301,8 +301,8 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving remaining time for user {UserId} on computer {ComputerId}",
-                    userId, computerId);
+                _logger.LogError(ex, string.Format("Error retrieving remaining time for user {0} on computer {1}",
+                    userId, computerId));
 
                 if (ex.Message.Contains("No active session"))
                     return NotFound(new { Message = ex.Message });
@@ -333,7 +333,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error checking if user {UserId} has active session", userId);
+                _logger.LogError(ex, string.Format("Error checking if user {0} has active session", userId));
                 return StatusCode(500, new { Message = "An error occurred while checking for active session" });
             }
         }
@@ -360,8 +360,8 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving sessions for date range {StartDate} to {EndDate}",
-                    startDate, endDate);
+                _logger.LogError(ex, string.Format("Error retrieving sessions for date range {0} to {1}",
+                    startDate, endDate));
                 return StatusCode(500, new { Message = "An error occurred while retrieving sessions" });
             }
         }

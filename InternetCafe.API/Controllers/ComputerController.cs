@@ -78,7 +78,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving computers with status {Status}", status);
+                _logger.LogError(ex, string.Format("Error retrieving computers with status {0}", status));
                 return StatusCode(500, new { Message = "An error occurred while retrieving computers" });
             }
         }
@@ -96,7 +96,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving computer with ID {ComputerId}", id);
+                _logger.LogError(ex, string.Format("Error retrieving computer with ID {0}", id));
                 return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
                     StatusCode(500, new { Message = "An error occurred while retrieving computer" });
             }
@@ -115,7 +115,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving computer details for computer with ID {ComputerId}", id);
+                _logger.LogError(ex, string.Format("Error retrieving computer details for computer with ID {0}", id));
                 return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
                     StatusCode(500, new { Message = "An error occurred while retrieving computer details" });
             }
@@ -136,7 +136,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error registering computer with name {ComputerName}", createComputerDTO.Name);
+                _logger.LogError(ex, string.Format("Error registering computer with name {0}", createComputerDTO.Name));
                 return ex.Message.Contains("already exists") || ex.Message.Contains("Invalid") ?
                     BadRequest(new { Message = ex.Message }) :
                     StatusCode(500, new { Message = "An error occurred while registering computer" });
@@ -159,7 +159,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating computer with ID {ComputerId}", id);
+                _logger.LogError(ex, string.Format("Error updating computer with ID {0}", id));
                 if (ex.Message.Contains("not found"))
                     return NotFound(new { Message = ex.Message });
                 else if (ex.Message.Contains("already exists") || ex.Message.Contains("Invalid"))
@@ -196,7 +196,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating status for computer with ID {ComputerId}", id);
+                _logger.LogError(ex, string.Format("Error updating status for computer with ID {0}", id));
                 if (ex.Message.Contains("not found"))
                     return NotFound(new { Message = ex.Message });
                 else if (ex.Message.Contains("active session"))
@@ -222,7 +222,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error setting maintenance mode for computer with ID {ComputerId}", id);
+                _logger.LogError(ex, string.Format("Error setting maintenance mode for computer with ID {0}", id));
                 if (ex.Message.Contains("not found"))
                     return NotFound(new { Message = ex.Message });
                 else if (ex.Message.Contains("active session"))
@@ -245,7 +245,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error checking availability for computer with ID {ComputerId}", id);
+                _logger.LogError(ex, string.Format("Error checking availability for computer with ID {0}", id));
                 return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
                     StatusCode(500, new { Message = "An error occurred while checking computer availability" });
             }

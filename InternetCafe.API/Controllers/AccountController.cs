@@ -54,7 +54,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving account for user with ID {UserId}", userId);
+                _logger.LogError(ex, string.Format("Error retrieving account for user with ID {0}", userId));
                 return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
                     StatusCode(500, new { Message = "An error occurred while retrieving account" });
             }
@@ -84,7 +84,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving account details for account with ID {AccountId}", accountId);
+                _logger.LogError(ex, string.Format("Error retrieving account details for account with ID {0}", accountId));
                 return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
                     StatusCode(500, new { Message = "An error occurred while retrieving account details" });
             }
@@ -116,7 +116,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving balance for account with ID {AccountId}", accountId);
+                _logger.LogError(ex, string.Format("Error retrieving balance for account with ID {0}", accountId));
                 return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
                     StatusCode(500, new { Message = "An error occurred while retrieving balance" });
             }
@@ -154,7 +154,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error depositing to account with ID {AccountId}", depositDTO.AccountId);
+                _logger.LogError(ex, string.Format("Error depositing to account with ID {0}", depositDTO.AccountId));
                 return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
                     BadRequest(new { Message = ex.Message });
             }
@@ -181,7 +181,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error withdrawing from account with ID {AccountId}", withdrawDTO.AccountId);
+                _logger.LogError(ex, string.Format("Error withdrawing from account with ID {0}", withdrawDTO.AccountId));
 
                 if (ex.Message.Contains("not found"))
                     return NotFound(new { Message = ex.Message });
@@ -221,7 +221,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving transactions for account with ID {AccountId}", accountId);
+                _logger.LogError(ex, string.Format("Error retrieving transactions for account with ID {0}", accountId));
                 return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
                     StatusCode(500, new { Message = "An error occurred while retrieving transactions" });
             }
