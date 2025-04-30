@@ -20,8 +20,6 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 // Register application services
 builder.Services.AddApplicationServices();
 
-
-
 // Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

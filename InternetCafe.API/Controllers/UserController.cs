@@ -76,7 +76,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving user with ID {UserId}", id);
+                _logger.LogError(ex, string.Format("Error retrieving user with ID {0}", id));
                 return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
                     StatusCode(500, new { Message = "An error occurred while retrieving user" });
             }
@@ -105,7 +105,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving user details for user with ID {UserId}", id);
+                _logger.LogError(ex, string.Format("Error retrieving user details for user with ID {0}", id));
                 return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
                     StatusCode(500, new { Message = "An error occurred while retrieving user details" });
             }
@@ -119,27 +119,26 @@ namespace InternetCafe.API.Controllers
         {
             try
             {
-                // If user is not logged in, they can only create customer accounts
-                if (!User.Identity.IsAuthenticated)
-                {
-                    createUserDTO.Role = (int)UserRole.Customer;
-                }
-                // If user is logged in but not admin, they can't create admin accounts
-                else if (User.FindFirstValue(ClaimTypes.Role) != "2" && createUserDTO.Role == (int)UserRole.Admin)
-                {
-                    return Forbid();
-                }
+                // If user is not logged in, they can only create customer accounts and vice versa
+                // we won't use this feature temporarily, because this project for student
+                //if (!User.Identity.IsAuthenticated)
+                //{
+                //    createUserDTO.Role = (int)UserRole.Customer;
+                //}
+                //else if (User.FindFirstValue(ClaimTypes.Role) != "2" && createUserDTO.Role == (int)UserRole.Admin)
+                //{
+                //    return Forbid();
+                //}
 
                 var user = await _userService.RegisterUserAsync(createUserDTO);
 
-                // Create account for the user
                 await _accountService.CreateAccountAsync(user.Id);
 
                 return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error registering user {Username}", createUserDTO.Username);
+                _logger.LogError(ex, string.Format("Error registering user {0}", createUserDTO.Username));
                 return ex.Message.Contains("already exists") ?
                     Conflict(new { Message = ex.Message }) :
                     BadRequest(new { Message = ex.Message });
@@ -169,7 +168,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating user with ID {UserId}", id);
+                _logger.LogError(ex, string.Format("Error updating user with ID {0}", id));
                 return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
                     BadRequest(new { Message = ex.Message });
             }
@@ -202,7 +201,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error changing password for user with ID {UserId}", id);
+                _logger.LogError(ex, string.Format("Error changing password for user with ID {0}", id));
 
                 if (ex.Message.Contains("not found"))
                     return NotFound(new { Message = ex.Message });
@@ -233,7 +232,7 @@ namespace InternetCafe.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error changing status for user with ID {UserId}", id);
+                _logger.LogError(ex, string.Format("Error changing status for user with ID {0}", id));
                 return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
                     BadRequest(new { Message = ex.Message });
             }

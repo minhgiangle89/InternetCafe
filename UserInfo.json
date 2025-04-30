@@ -1,0 +1,42 @@
+[
+	{
+		"username": "admin",
+		"email": "admin@internetcafe.com",
+		"password": "Admin@123",
+		"fullName": "System Administrator",
+		"phoneNumber": "0123456789",
+		"address": "Internet Cafe Office",
+		"dateOfBirth": "1990-01-01T00:00:00.0000",
+		"role": 2
+	},
+	{
+		"username": "giang.le",
+		"email": "giang.le@gmail.com",
+		"password": "giang@le",
+		"fullName": "Le Minh Giang",
+		"phoneNumber": "0830001111",
+		"address": "ABC Q1",
+		"dateOfBirth": "1989-09-01T08:18:54.476Z",
+		"role": 2
+	},
+	{
+		"username": "trang.vo",
+		"email": "trang.vo@gmail.com",
+		"password": "trang@vo",
+		"fullName": "Vo Trang",
+		"phoneNumber": "0830001111",
+		"address": "ABC Q1",
+		"dateOfBirth": "1989-09-01T08:18:54.476Z",
+		"role": 2
+	},
+	{
+		"username": "hoang.kim",
+		"email": "hoang.kim@gmail.com",
+		"password": "hoang@kim",
+		"fullName": "Kim Hoang",
+		"phoneNumber": "0830001111",
+		"address": "ABC Q1",
+		"dateOfBirth": "1989-09-01T08:18:54.476Z",
+		"role": 2
+	}
+]

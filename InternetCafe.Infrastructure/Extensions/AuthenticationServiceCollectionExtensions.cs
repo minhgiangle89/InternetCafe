@@ -75,12 +75,10 @@ namespace InternetCafe.Infrastructure.Extensions
                                 {
                                     context.Response.Headers.Add("Token-Expired", "true");
                                 }
-                                Console.WriteLine($"Authentication failed: {context.Exception}");
                                 return Task.CompletedTask;
                             },
                             OnTokenValidated = context =>
                             {
-                                Console.WriteLine("Token was validated successfully");
                                 return Task.CompletedTask;
                             }
                         };

@@ -17,8 +17,8 @@ namespace InternetCafe.Infrastructure.Logging
         public Task LogActivityAsync(string action, string entityName, int entityId, int userId, DateTime timestamp, string? details = null)
         {
             _logger.LogInformation(
-                "AUDIT: Action={Action}, Entity={EntityName}, EntityId={EntityId}, UserId={UserId}, Timestamp={Timestamp}, Details={Details}",
-                action, entityName, entityId, userId, timestamp, details);
+                string.Format("AUDIT: Action={0}, Entity={1}, EntityId={2}, UserId={3}, Timestamp={4}, Details={5}",
+                action, entityName, entityId, userId, timestamp, details));
 
             return Task.CompletedTask;
         }
@@ -28,14 +28,14 @@ namespace InternetCafe.Infrastructure.Logging
             if (success)
             {
                 _logger.LogInformation(
-                    "LOGIN: User={Username} successfully logged in from IP={IpAddress} at {Timestamp}",
-                    username, ipAddress, timestamp);
+                    string.Format("LOGIN: User={0} successfully logged in from IP={1} at {2}",
+                    username, ipAddress, timestamp));
             }
             else
             {
                 _logger.LogWarning(
-                    "LOGIN FAILED: User={Username} failed to log in from IP={IpAddress} at {Timestamp}",
-                    username, ipAddress, timestamp);
+                    string.Format("LOGIN FAILED: User={0} failed to log in from IP={1} at {2}",
+                    username, ipAddress, timestamp));
             }
 
             return Task.CompletedTask;
@@ -44,8 +44,8 @@ namespace InternetCafe.Infrastructure.Logging
         public Task LogSystemEventAsync(string eventType, string description, DateTime timestamp, int? userId = null)
         {
             _logger.LogInformation(
-                "SYSTEM: Event={EventType}, Description={Description}, Timestamp={Timestamp}, UserId={UserId}",
-                eventType, description, timestamp, userId);
+                string.Format("SYSTEM: Event={0}, Description={1}, Timestamp={2}, UserId={3}",
+                eventType, description, timestamp, userId));
 
             return Task.CompletedTask;
         }
