@@ -1,12 +1,13 @@
-﻿using InternetCafe.Application.DTOs.Session;
+﻿using InternetCafe.API.Common;
+using InternetCafe.Application.DTOs.Session;
 using InternetCafe.Application.Interfaces;
 using InternetCafe.Application.Interfaces.Services;
+using InternetCafe.Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace InternetCafe.API.Controllers
@@ -31,320 +32,326 @@ namespace InternetCafe.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "1,2")] // Staff and Admin only
-        [ProducesResponseType(typeof(IEnumerable<SessionDTO>), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        public async Task<ActionResult<IEnumerable<SessionDTO>>> GetActiveSessions()
+        [Authorize(Roles = "1,2")]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 500)]
+        public async Task<ActionResult<ApiResponse<IEnumerable<SessionDTO>>>> GetActiveSessions()
         {
             try
             {
                 var sessions = await _sessionService.GetActiveSessionsAsync();
-                return Ok(sessions);
+                return Ok(ApiResponseFactory.Success(sessions, "Danh sách phiên hoạt động được tải thành công"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving active sessions");
-                return StatusCode(500, new { Message = "An error occurred while retrieving active sessions" });
+                _logger.LogError(ex, "Lỗi khi lấy danh sách phiên hoạt động");
+                return StatusCode(500, ApiResponseFactory.Fail<IEnumerable<SessionDTO>>("Lỗi server khi lấy danh sách phiên hoạt động"));
             }
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(SessionDTO), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<SessionDTO>> GetSessionById(int id)
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 500)]
+        public async Task<ActionResult<ApiResponse<SessionDTO>>> GetSessionById(int id)
         {
             try
             {
                 var session = await _sessionService.GetSessionDetailsAsync(id);
 
-                // Ensure user can only access their own sessions unless they're staff or admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (session.UserId != currentUserId && userRole != "1" && userRole != "2") // Not own session and not staff/admin
+                if (session.UserId != currentUserId && !User.IsInRole("1") && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
-                return Ok(session);
+                return Ok(ApiResponseFactory.Success(session, "Thông tin phiên được tải thành công"));
+            }
+            catch (SessionNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Không tìm thấy phiên có ID {SessionId}", id);
+                return NotFound(ApiResponseFactory.Fail<SessionDTO>($"Không tìm thấy phiên có ID {id}"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error retrieving session with ID {0}", id));
-                return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
-                    StatusCode(500, new { Message = "An error occurred while retrieving session" });
+                _logger.LogError(ex, "Lỗi khi lấy thông tin phiên có ID {SessionId}", id);
+                return StatusCode(500, ApiResponseFactory.Fail<SessionDTO>("Lỗi server khi lấy thông tin phiên"));
             }
         }
 
         [HttpGet("user/{userId}")]
-        [ProducesResponseType(typeof(IEnumerable<SessionDTO>), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<IEnumerable<SessionDTO>>> GetSessionsByUserId(int userId)
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 500)]
+        public async Task<ActionResult<ApiResponse<IEnumerable<SessionDTO>>>> GetSessionsByUserId(int userId)
         {
             try
             {
-                // Ensure user can only access their own sessions unless they're staff or admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (userId != currentUserId && userRole != "1" && userRole != "2") // Not own sessions and not staff/admin
+                if (userId != currentUserId && !User.IsInRole("1") && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
                 var sessions = await _sessionService.GetSessionsByUserIdAsync(userId);
-                return Ok(sessions);
+                return Ok(ApiResponseFactory.Success(sessions, "Danh sách phiên của người dùng được tải thành công"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error retrieving sessions for user with ID {0}", userId));
-                return StatusCode(500, new { Message = "An error occurred while retrieving sessions" });
+                _logger.LogError(ex, "Lỗi khi lấy danh sách phiên cho người dùng có ID {UserId}", userId);
+                return StatusCode(500, ApiResponseFactory.Fail<IEnumerable<SessionDTO>>("Lỗi server khi lấy danh sách phiên của người dùng"));
             }
         }
 
         [HttpGet("computer/{computerId}")]
-        [ProducesResponseType(typeof(SessionDTO), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<SessionDTO>> GetActiveSessionByComputerId(int computerId)
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 500)]
+        public async Task<ActionResult<ApiResponse<SessionDTO>>> GetActiveSessionByComputerId(int computerId)
         {
             try
             {
                 var session = await _sessionService.GetActiveSessionByComputerIdAsync(computerId);
                 if (session == null)
                 {
-                    return NotFound(new { Message = $"No active session found for computer with ID {computerId}" });
+                    return NotFound(ApiResponseFactory.Fail<SessionDTO>($"Không tìm thấy phiên hoạt động cho máy tính có ID {computerId}"));
                 }
 
-                // Ensure user can only access their own session unless they're staff or admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (session.UserId != currentUserId && userRole != "1" && userRole != "2") // Not own session and not staff/admin
+                if (session.UserId != currentUserId && !User.IsInRole("1") && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
-                return Ok(session);
+                return Ok(ApiResponseFactory.Success(session, "Phiên hoạt động của máy tính được tải thành công"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error retrieving active session for computer with ID {0}", computerId));
-                return StatusCode(500, new { Message = "An error occurred while retrieving session" });
+                _logger.LogError(ex, "Lỗi khi lấy phiên hoạt động cho máy tính có ID {ComputerId}", computerId);
+                return StatusCode(500, ApiResponseFactory.Fail<SessionDTO>("Lỗi server khi lấy phiên hoạt động của máy tính"));
             }
         }
 
         [HttpPost("start")]
-        [ProducesResponseType(typeof(SessionDTO), 201)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<SessionDTO>> StartSession([FromBody] StartSessionDTO startSessionDTO)
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 201)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 500)]
+        public async Task<ActionResult<ApiResponse<SessionDTO>>> StartSession([FromBody] StartSessionDTO startSessionDTO)
         {
             try
             {
-                // Ensure user can only start session for themselves unless they're staff or admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (startSessionDTO.UserId != currentUserId && userRole != "1" && userRole != "2") // Not own session and not staff/admin
+                if (startSessionDTO.UserId != currentUserId && !User.IsInRole("1") && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
                 var session = await _sessionService.StartSessionAsync(startSessionDTO);
-                return CreatedAtAction(nameof(GetSessionById), new { id = session.Id }, session);
+                return CreatedAtAction(nameof(GetSessionById), new { id = session.Id },
+                    ApiResponseFactory.Success(session, "Bắt đầu phiên thành công"));
+            }
+            catch (UserNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Không tìm thấy người dùng có ID {UserId}", startSessionDTO.UserId);
+                return NotFound(ApiResponseFactory.Fail<SessionDTO>(ex.Message));
+            }
+            catch (ComputerNotAvailableException ex)
+            {
+                _logger.LogWarning(ex, "Máy tính có ID {ComputerId} không khả dụng", startSessionDTO.ComputerId);
+                return BadRequest(ApiResponseFactory.Fail<SessionDTO>(ex.Message));
+            }
+            catch (InsufficientBalanceException ex)
+            {
+                _logger.LogWarning(ex, "Số dư không đủ để bắt đầu phiên cho người dùng có ID {UserId}", startSessionDTO.UserId);
+                return BadRequest(ApiResponseFactory.Fail<SessionDTO>(ex.Message));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error starting session for user {0} on computer {1}",
-                    startSessionDTO.UserId, startSessionDTO.ComputerId));
+                _logger.LogError(ex, "Lỗi khi bắt đầu phiên cho người dùng {UserId} trên máy tính {ComputerId}",
+                    startSessionDTO.UserId, startSessionDTO.ComputerId);
 
-                if (ex.Message.Contains("not found"))
-                    return NotFound(new { Message = ex.Message });
-                else if (ex.Message.Contains("not available"))
-                    return BadRequest(new { Message = ex.Message });
-                else if (ex.Message.Contains("already has an active session"))
-                    return BadRequest(new { Message = ex.Message });
-                else if (ex.Message.Contains("insufficient"))
-                    return BadRequest(new { Message = ex.Message });
-                else
-                    return StatusCode(500, new { Message = "An error occurred while starting session" });
+                if (ex.Message.Contains("already has an active session"))
+                    return BadRequest(ApiResponseFactory.Fail<SessionDTO>(ex.Message));
+
+                return StatusCode(500, ApiResponseFactory.Fail<SessionDTO>("Lỗi server khi bắt đầu phiên"));
             }
         }
 
         [HttpPost("end")]
-        [ProducesResponseType(typeof(SessionDTO), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<SessionDTO>> EndSession([FromBody] EndSessionDTO endSessionDTO)
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 500)]
+        public async Task<ActionResult<ApiResponse<SessionDTO>>> EndSession([FromBody] EndSessionDTO endSessionDTO)
         {
             try
             {
-                // First get the session to check permissions
                 var session = await _sessionService.GetSessionDetailsAsync(endSessionDTO.SessionId);
 
-                // Ensure user can only end their own sessions unless they're staff or admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (session.UserId != currentUserId && userRole != "1" && userRole != "2") // Not own session and not staff/admin
+                if (session.UserId != currentUserId && !User.IsInRole("1") && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
                 var endedSession = await _sessionService.EndSessionAsync(endSessionDTO);
-                return Ok(endedSession);
+                return Ok(ApiResponseFactory.Success(endedSession, "Kết thúc phiên thành công"));
+            }
+            catch (SessionNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Không tìm thấy phiên có ID {SessionId}", endSessionDTO.SessionId);
+                return NotFound(ApiResponseFactory.Fail<SessionDTO>(ex.Message));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error ending session with ID {0}", endSessionDTO.SessionId));
+                _logger.LogError(ex, "Lỗi khi kết thúc phiên có ID {SessionId}", endSessionDTO.SessionId);
 
-                if (ex.Message.Contains("not found"))
-                    return NotFound(new { Message = ex.Message });
-                else if (ex.Message.Contains("not active"))
-                    return BadRequest(new { Message = ex.Message });
-                else
-                    return StatusCode(500, new { Message = "An error occurred while ending session" });
+                if (ex.Message.Contains("not active"))
+                    return BadRequest(ApiResponseFactory.Fail<SessionDTO>(ex.Message));
+
+                return StatusCode(500, ApiResponseFactory.Fail<SessionDTO>("Lỗi server khi kết thúc phiên"));
             }
         }
 
         [HttpPost("{id}/terminate")]
-        [Authorize(Roles = "1,2")] // Staff and Admin only
-        [ProducesResponseType(typeof(SessionDTO), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<SessionDTO>> TerminateSession(int id, [FromBody] string reason)
+        [Authorize(Roles = "1,2")]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<SessionDTO>), 500)]
+        public async Task<ActionResult<ApiResponse<SessionDTO>>> TerminateSession(int id, [FromBody] string reason)
         {
             try
             {
                 var session = await _sessionService.TerminateSessionAsync(id, reason);
-                return Ok(session);
+                return Ok(ApiResponseFactory.Success(session, "Dừng phiên thành công"));
+            }
+            catch (SessionNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Không tìm thấy phiên có ID {SessionId}", id);
+                return NotFound(ApiResponseFactory.Fail<SessionDTO>(ex.Message));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error terminating session with ID {0}", id));
+                _logger.LogError(ex, "Lỗi khi dừng phiên có ID {SessionId}", id);
 
-                if (ex.Message.Contains("not found"))
-                    return NotFound(new { Message = ex.Message });
-                else if (ex.Message.Contains("not active"))
-                    return BadRequest(new { Message = ex.Message });
-                else
-                    return StatusCode(500, new { Message = "An error occurred while terminating session" });
+                if (ex.Message.Contains("not active"))
+                    return BadRequest(ApiResponseFactory.Fail<SessionDTO>(ex.Message));
+
+                return StatusCode(500, ApiResponseFactory.Fail<SessionDTO>("Lỗi server khi dừng phiên"));
             }
         }
 
         [HttpGet("{id}/cost")]
-        [ProducesResponseType(typeof(decimal), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<decimal>> CalculateSessionCost(int id)
+        [ProducesResponseType(typeof(ApiResponse<decimal>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<decimal>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<decimal>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<decimal>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<decimal>), 500)]
+        public async Task<ActionResult<ApiResponse<decimal>>> CalculateSessionCost(int id)
         {
             try
             {
-                // First get the session to check permissions
                 var session = await _sessionService.GetSessionDetailsAsync(id);
-
-                // Ensure user can only access their own sessions unless they're staff or admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (session.UserId != currentUserId && userRole != "1" && userRole != "2") // Not own session and not staff/admin
+                if (session.UserId != currentUserId && !User.IsInRole("1") && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
                 var cost = await _sessionService.CalculateSessionCostAsync(id);
-                return Ok(cost);
+                return Ok(ApiResponseFactory.Success(cost, "Tính phí phiên thành công"));
+            }
+            catch (SessionNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Không tìm thấy phiên có ID {SessionId}", id);
+                return NotFound(ApiResponseFactory.Fail<decimal>(ex.Message));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error calculating cost for session with ID {0}", id));
-
-                if (ex.Message.Contains("not found"))
-                    return NotFound(new { Message = ex.Message });
-                else
-                    return StatusCode(500, new { Message = "An error occurred while calculating session cost" });
+                _logger.LogError(ex, "Lỗi khi tính phí phiên có ID {SessionId}", id);
+                return StatusCode(500, ApiResponseFactory.Fail<decimal>("Lỗi server khi tính phí phiên"));
             }
         }
 
         [HttpGet("user/{userId}/computer/{computerId}/remaining-time")]
-        [ProducesResponseType(typeof(TimeSpan), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<TimeSpan>> GetRemainingTime(int userId, int computerId)
+        [ProducesResponseType(typeof(ApiResponse<TimeSpan>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<TimeSpan>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<TimeSpan>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<TimeSpan>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<TimeSpan>), 500)]
+        public async Task<ActionResult<ApiResponse<TimeSpan>>> GetRemainingTime(int userId, int computerId)
         {
             try
             {
-                // Ensure user can only access their own remaining time unless they're staff or admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (userId != currentUserId && userRole != "1" && userRole != "2") // Not own time and not staff/admin
+                if (userId != currentUserId && !User.IsInRole("1") && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
                 var remainingTime = await _sessionService.GetRemainingTimeAsync(userId, computerId);
-                return Ok(remainingTime);
+                return Ok(ApiResponseFactory.Success(remainingTime, "Lấy thời gian sử dụng còn lại thành công"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error retrieving remaining time for user {0} on computer {1}",
-                    userId, computerId));
+                _logger.LogError(ex, "Lỗi khi lấy thời gian sử dụng còn lại cho người dùng {UserId} trên máy tính {ComputerId}",
+                    userId, computerId);
 
                 if (ex.Message.Contains("No active session"))
-                    return NotFound(new { Message = ex.Message });
-                else
-                    return StatusCode(500, new { Message = "An error occurred while retrieving remaining time" });
+                    return NotFound(ApiResponseFactory.Fail<TimeSpan>(ex.Message));
+
+                return StatusCode(500, ApiResponseFactory.Fail<TimeSpan>("Lỗi server khi lấy thời gian sử dụng còn lại"));
             }
         }
 
         [HttpGet("user/{userId}/has-active-session")]
-        [ProducesResponseType(typeof(bool), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        public async Task<ActionResult<bool>> HasActiveSession(int userId)
+        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), 500)]
+        public async Task<ActionResult<ApiResponse<bool>>> HasActiveSession(int userId)
         {
             try
             {
-                // Ensure user can only check their own session status unless they're staff or admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (userId != currentUserId && userRole != "1" && userRole != "2") // Not own status and not staff/admin
+                if (userId != currentUserId && !User.IsInRole("1") && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
                 var hasActiveSession = await _sessionService.HasActiveSessionAsync(userId);
-                return Ok(hasActiveSession);
+                return Ok(ApiResponseFactory.Success(hasActiveSession, "Kiểm tra phiên hoạt động thành công"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error checking if user {0} has active session", userId));
-                return StatusCode(500, new { Message = "An error occurred while checking for active session" });
+                _logger.LogError(ex, "Lỗi khi kiểm tra phiên hoạt động cho người dùng có ID {UserId}", userId);
+                return StatusCode(500, ApiResponseFactory.Fail<bool>("Lỗi server khi kiểm tra phiên hoạt động"));
             }
         }
 
         [HttpGet("date-range")]
-        [Authorize(Roles = "1,2")] // Staff and Admin only
-        [ProducesResponseType(typeof(IEnumerable<SessionDTO>), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<IEnumerable<SessionDTO>>> GetSessionsByDateRange(
+        [Authorize(Roles = "1,2")]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionDTO>>), 500)]
+        public async Task<ActionResult<ApiResponse<IEnumerable<SessionDTO>>>> GetSessionsByDateRange(
             [FromQuery] DateTime startDate,
             [FromQuery] DateTime endDate)
         {
@@ -352,17 +359,17 @@ namespace InternetCafe.API.Controllers
             {
                 if (startDate > endDate)
                 {
-                    return BadRequest(new { Message = "Start date must be before end date" });
+                    return BadRequest(ApiResponseFactory.Fail<IEnumerable<SessionDTO>>("Ngày bắt đầu phải trước ngày kết thúc"));
                 }
 
                 var sessions = await _sessionService.GetSessionsByDateRangeAsync(startDate, endDate);
-                return Ok(sessions);
+                return Ok(ApiResponseFactory.Success(sessions, "Danh sách phiên theo khoảng thời gian được tải thành công"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error retrieving sessions for date range {0} to {1}",
-                    startDate, endDate));
-                return StatusCode(500, new { Message = "An error occurred while retrieving sessions" });
+                _logger.LogError(ex, "Lỗi khi lấy danh sách phiên theo khoảng thời gian từ {StartDate} đến {EndDate}",
+                    startDate, endDate);
+                return StatusCode(500, ApiResponseFactory.Fail<IEnumerable<SessionDTO>>("Lỗi server khi lấy danh sách phiên theo khoảng thời gian"));
             }
         }
     }

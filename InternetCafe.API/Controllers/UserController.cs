@@ -1,13 +1,15 @@
-﻿using InternetCafe.Application.DTOs.User;
+﻿using InternetCafe.API.Common;
+using InternetCafe.Application.DTOs.User;
 using InternetCafe.Application.Interfaces;
 using InternetCafe.Application.Interfaces.Services;
 using InternetCafe.Domain.Enums;
+using InternetCafe.Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Security.Claims;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 
 namespace InternetCafe.API.Controllers
@@ -36,230 +38,253 @@ namespace InternetCafe.API.Controllers
 
         [HttpGet]
         [Authorize(Roles = "2")] // Admin only
-        [ProducesResponseType(typeof(IEnumerable<UserDTO>), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers()
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<UserDTO>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<UserDTO>>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<UserDTO>>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<UserDTO>>), 500)]
+        public async Task<ActionResult<ApiResponse<IEnumerable<UserDTO>>>> GetAllUsers()
         {
             try
             {
                 var users = await _userService.GetAllUsersAsync();
-                return Ok(users);
+                return Ok(ApiResponseFactory.Success(users, "Danh sách người dùng được tải thành công"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving all users");
-                return StatusCode(500, new { Message = "An error occurred while retrieving users" });
+                _logger.LogError(ex, "Lỗi khi lấy danh sách người dùng");
+                return StatusCode(500, ApiResponseFactory.Fail<IEnumerable<UserDTO>>("Lỗi server khi lấy danh sách người dùng"));
             }
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(UserDTO), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<UserDTO>> GetUserById(int id)
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), 500)]
+        public async Task<ActionResult<ApiResponse<UserDTO>>> GetUserById(int id)
         {
             try
             {
-                // Ensure user can only access their own data unless they're admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (currentUserId != id && userRole != "2") // Not own profile and not admin
+                if (currentUserId != id && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
                 var user = await _userService.GetUserByIdAsync(id);
-                return Ok(user);
+                return Ok(ApiResponseFactory.Success(user, "Thông tin người dùng được tải thành công"));
+            }
+            catch (UserNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Không tìm thấy người dùng có ID {UserId}", id);
+                return NotFound(ApiResponseFactory.Fail<UserDTO>($"Không tìm thấy người dùng có ID {id}"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error retrieving user with ID {0}", id));
-                return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
-                    StatusCode(500, new { Message = "An error occurred while retrieving user" });
+                _logger.LogError(ex, "Lỗi khi lấy thông tin người dùng có ID {UserId}", id);
+                return StatusCode(500, ApiResponseFactory.Fail<UserDTO>("Lỗi server khi lấy thông tin người dùng"));
             }
         }
 
         [HttpGet("{id}/details")]
-        [ProducesResponseType(typeof(UserDetailsDTO), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<UserDetailsDTO>> GetUserDetails(int id)
+        [ProducesResponseType(typeof(ApiResponse<UserDetailsDTO>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<UserDetailsDTO>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<UserDetailsDTO>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<UserDetailsDTO>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<UserDetailsDTO>), 500)]
+        public async Task<ActionResult<ApiResponse<UserDetailsDTO>>> GetUserDetails(int id)
         {
             try
             {
-                // Ensure user can only access their own data unless they're admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (currentUserId != id && userRole != "2") // Not own profile and not admin
+                if (currentUserId != id && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
                 var userDetails = await _userService.GetUserDetailsAsync(id);
-                return Ok(userDetails);
+                return Ok(ApiResponseFactory.Success(userDetails, "Chi tiết người dùng được tải thành công"));
+            }
+            catch (UserNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Không tìm thấy người dùng có ID {UserId}", id);
+                return NotFound(ApiResponseFactory.Fail<UserDetailsDTO>($"Không tìm thấy người dùng có ID {id}"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error retrieving user details for user with ID {0}", id));
-                return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
-                    StatusCode(500, new { Message = "An error occurred while retrieving user details" });
+                _logger.LogError(ex, "Lỗi khi lấy chi tiết người dùng có ID {UserId}", id);
+                return StatusCode(500, ApiResponseFactory.Fail<UserDetailsDTO>("Lỗi server khi lấy chi tiết người dùng"));
             }
         }
 
         [HttpPost]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(UserDTO), 201)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<UserDTO>> RegisterUser([FromBody] CreateUserDTO createUserDTO)
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), 201)]
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), 409)]
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), 500)]
+        public async Task<ActionResult<ApiResponse<UserDTO>>> RegisterUser([FromBody] CreateUserDTO createUserDTO)
         {
             try
             {
-                // If user is not logged in, they can only create customer accounts and vice versa
-                // we won't use this feature temporarily, because this project for student
                 //if (!User.Identity.IsAuthenticated)
                 //{
                 //    createUserDTO.Role = (int)UserRole.Customer;
                 //}
-                //else if (User.FindFirstValue(ClaimTypes.Role) != "2" && createUserDTO.Role == (int)UserRole.Admin)
+                //else if (!User.IsInRole("2") && createUserDTO.Role == (int)UserRole.Admin)
                 //{
                 //    return Forbid();
                 //}
 
                 var user = await _userService.RegisterUserAsync(createUserDTO);
-
                 await _accountService.CreateAccountAsync(user.Id);
 
-                return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+                return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, 
+                    ApiResponseFactory.Success(user, "Đăng ký người dùng thành công"));
+            }
+            catch (DuplicateUserException ex)
+            {
+                _logger.LogWarning(ex, "Đăng ký người dùng thất bại: Trùng lặp thông tin");
+                return Conflict(ApiResponseFactory.Fail<UserDTO>(ex.Message));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error registering user {0}", createUserDTO.Username));
-                return ex.Message.Contains("already exists") ?
-                    Conflict(new { Message = ex.Message }) :
-                    BadRequest(new { Message = ex.Message });
+                _logger.LogError(ex, "Lỗi khi đăng ký người dùng {Username}", createUserDTO.Username);
+                return BadRequest(ApiResponseFactory.Fail<UserDTO>("Đăng ký người dùng không thành công"));
             }
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult> UpdateUser(int id, [FromBody] UpdateUserDTO updateUserDTO)
+        [ProducesResponseType(typeof(ApiResponseBase), 200)]
+        [ProducesResponseType(typeof(ApiResponseBase), 401)]
+        [ProducesResponseType(typeof(ApiResponseBase), 403)]
+        [ProducesResponseType(typeof(ApiResponseBase), 404)]
+        [ProducesResponseType(typeof(ApiResponseBase), 400)]
+        [ProducesResponseType(typeof(ApiResponseBase), 500)]
+        public async Task<ActionResult<ApiResponseBase>> UpdateUser(int id, [FromBody] UpdateUserDTO updateUserDTO)
         {
             try
             {
-                // Ensure user can only update their own data unless they're admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (currentUserId != id && userRole != "2") // Not own profile and not admin
+                if (currentUserId != id && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
                 await _userService.UpdateUserAsync(id, updateUserDTO);
-                return Ok(new { Message = "User updated successfully" });
+                return Ok(ApiResponseFactory.Success("Cập nhật thông tin người dùng thành công"));
+            }
+            catch (UserNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Không tìm thấy người dùng có ID {UserId}", id);
+                return NotFound(ApiResponseFactory.Fail($"Không tìm thấy người dùng có ID {id}"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error updating user with ID {0}", id));
-                return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
-                    BadRequest(new { Message = ex.Message });
+                _logger.LogError(ex, "Lỗi khi cập nhật thông tin người dùng có ID {UserId}", id);
+                return BadRequest(ApiResponseFactory.Fail("Cập nhật thông tin người dùng không thành công"));
             }
         }
 
         [HttpPut("{id}/change-password")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult> ChangePassword(int id, [FromBody] ChangePasswordDTO changePasswordDTO)
+        [ProducesResponseType(typeof(ApiResponseBase), 200)]
+        [ProducesResponseType(typeof(ApiResponseBase), 401)]
+        [ProducesResponseType(typeof(ApiResponseBase), 403)]
+        [ProducesResponseType(typeof(ApiResponseBase), 404)]
+        [ProducesResponseType(typeof(ApiResponseBase), 400)]
+        public async Task<ActionResult<ApiResponseBase>> ChangePassword(int id, [FromBody] ChangePasswordDTO changePasswordDTO)
         {
             try
             {
-                // Ensure user can only change their own password
                 var currentUserId = _currentUserService.UserId;
                 if (currentUserId != id)
                 {
                     return Forbid();
                 }
 
-                // Validate password match
                 if (changePasswordDTO.NewPassword != changePasswordDTO.ConfirmPassword)
                 {
-                    return BadRequest(new { Message = "New password and confirmation do not match" });
+                    return BadRequest(ApiResponseFactory.Fail("Mật khẩu mới và xác nhận mật khẩu không khớp"));
                 }
 
                 await _userService.ChangePasswordAsync(id, changePasswordDTO);
-                return Ok(new { Message = "Password changed successfully" });
+                return Ok(ApiResponseFactory.Success("Thay đổi mật khẩu thành công"));
+            }
+            catch (UserNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Không tìm thấy người dùng có ID {UserId}", id);
+                return NotFound(ApiResponseFactory.Fail($"Không tìm thấy người dùng có ID {id}"));
+            }
+            catch (AuthenticationException ex)
+            {
+                _logger.LogWarning(ex, "Mật khẩu hiện tại không chính xác cho người dùng ID {UserId}", id);
+                return BadRequest(ApiResponseFactory.Fail("Mật khẩu hiện tại không chính xác"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error changing password for user with ID {0}", id));
-
-                if (ex.Message.Contains("not found"))
-                    return NotFound(new { Message = ex.Message });
-                else if (ex.Message.Contains("incorrect"))
-                    return BadRequest(new { Message = "Current password is incorrect" });
-                else
-                    return BadRequest(new { Message = ex.Message });
+                _logger.LogError(ex, "Lỗi khi thay đổi mật khẩu cho người dùng có ID {UserId}", id);
+                return BadRequest(ApiResponseFactory.Fail("Thay đổi mật khẩu không thành công"));
             }
         }
 
         [HttpPut("{id}/status")]
         [Authorize(Roles = "2")] // Admin only
-        [ProducesResponseType(200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult> ChangeUserStatus(int id, [FromBody] int status)
+        [ProducesResponseType(typeof(ApiResponseBase), 200)]
+        [ProducesResponseType(typeof(ApiResponseBase), 401)]
+        [ProducesResponseType(typeof(ApiResponseBase), 403)]
+        [ProducesResponseType(typeof(ApiResponseBase), 404)]
+        [ProducesResponseType(typeof(ApiResponseBase), 400)]
+        public async Task<ActionResult<ApiResponseBase>> ChangeUserStatus(int id, [FromBody] int status)
         {
             try
             {
                 if (!Enum.IsDefined(typeof(UserStatus), status))
                 {
-                    return BadRequest(new { Message = "Invalid status value" });
+                    return BadRequest(ApiResponseFactory.Fail("Giá trị trạng thái không hợp lệ"));
                 }
 
                 await _userService.ChangeUserStatusAsync(id, (UserStatus)status);
-                return Ok(new { Message = "User status changed successfully" });
+                return Ok(ApiResponseFactory.Success("Thay đổi trạng thái người dùng thành công"));
+            }
+            catch (UserNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Không tìm thấy người dùng có ID {UserId}", id);
+                return NotFound(ApiResponseFactory.Fail($"Không tìm thấy người dùng có ID {id}"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error changing status for user with ID {0}", id));
-                return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
-                    BadRequest(new { Message = ex.Message });
+                _logger.LogError(ex, "Lỗi khi thay đổi trạng thái người dùng có ID {UserId}", id);
+                return BadRequest(ApiResponseFactory.Fail("Thay đổi trạng thái người dùng không thành công"));
             }
         }
 
         [HttpGet("current")]
-        [ProducesResponseType(typeof(UserDTO), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<UserDTO>> GetCurrentUser()
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), 404)]
+        public async Task<ActionResult<ApiResponse<UserDTO>>> GetCurrentUser()
         {
             try
             {
                 var userId = _currentUserService.UserId;
                 if (!userId.HasValue)
                 {
-                    return Unauthorized();
+                    return Unauthorized(ApiResponseFactory.Fail<UserDTO>("Người dùng chưa đăng nhập"));
                 }
 
                 var user = await _userService.GetUserByIdAsync(userId.Value);
-                return Ok(user);
+                return Ok(ApiResponseFactory.Success(user, "Thông tin người dùng hiện tại được tải thành công"));
+            }
+            catch (UserNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Không tìm thấy thông tin người dùng hiện tại");
+                return NotFound(ApiResponseFactory.Fail<UserDTO>("Không tìm thấy thông tin người dùng hiện tại"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving current user");
-                return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
-                    StatusCode(500, new { Message = "An error occurred while retrieving current user" });
+                _logger.LogError(ex, "Lỗi khi lấy thông tin người dùng hiện tại");
+                return StatusCode(500, ApiResponseFactory.Fail<UserDTO>("Lỗi server khi lấy thông tin người dùng hiện tại"));
             }
         }
     }

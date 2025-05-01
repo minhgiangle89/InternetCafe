@@ -1,13 +1,14 @@
-﻿using InternetCafe.Application.DTOs.Account;
+﻿using InternetCafe.API.Common;
+using InternetCafe.Application.DTOs.Account;
 using InternetCafe.Application.DTOs.Transaction;
 using InternetCafe.Application.Interfaces;
 using InternetCafe.Application.Interfaces.Services;
+using InternetCafe.Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace InternetCafe.API.Controllers
@@ -32,198 +33,202 @@ namespace InternetCafe.API.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        [ProducesResponseType(typeof(AccountDTO), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<AccountDTO>> GetAccountByUserId(int userId)
+        [ProducesResponseType(typeof(ApiResponse<AccountDTO>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<AccountDTO>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<AccountDTO>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<AccountDTO>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<AccountDTO>), 500)]
+        public async Task<ActionResult<ApiResponse<AccountDTO>>> GetAccountByUserId(int userId)
         {
             try
             {
-                // Ensure user can only access their own account unless they're admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (currentUserId != userId && userRole != "2") // Not own account and not admin
+                if (currentUserId != userId && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
                 var account = await _accountService.GetAccountByUserIdAsync(userId);
-                return Ok(account);
+                return Ok(ApiResponseFactory.Success(account, "Thông tin tài khoản được tải thành công"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error retrieving account for user with ID {0}", userId));
-                return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
-                    StatusCode(500, new { Message = "An error occurred while retrieving account" });
+                _logger.LogError(ex, "Lỗi khi lấy thông tin tài khoản cho người dùng có ID {UserId}", userId);
+
+                if (ex.Message.Contains("not found"))
+                    return NotFound(ApiResponseFactory.Fail<AccountDTO>($"Không tìm thấy tài khoản cho người dùng có ID {userId}"));
+
+                return StatusCode(500, ApiResponseFactory.Fail<AccountDTO>("Lỗi server khi lấy thông tin tài khoản"));
             }
         }
 
         [HttpGet("{accountId}")]
-        [ProducesResponseType(typeof(AccountDetailsDTO), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<AccountDetailsDTO>> GetAccountDetails(int accountId)
+        [ProducesResponseType(typeof(ApiResponse<AccountDetailsDTO>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<AccountDetailsDTO>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<AccountDetailsDTO>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<AccountDetailsDTO>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<AccountDetailsDTO>), 500)]
+        public async Task<ActionResult<ApiResponse<AccountDetailsDTO>>> GetAccountDetails(int accountId)
         {
             try
             {
                 var account = await _accountService.GetAccountWithTransactionsAsync(accountId);
 
-                // Ensure user can only access their own account unless they're admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (account.UserId != currentUserId && userRole != "2") // Not own account and not admin
+                if (account.UserId != currentUserId && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
-                return Ok(account);
+                return Ok(ApiResponseFactory.Success(account, "Chi tiết tài khoản được tải thành công"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error retrieving account details for account with ID {0}", accountId));
-                return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
-                    StatusCode(500, new { Message = "An error occurred while retrieving account details" });
+                _logger.LogError(ex, "Lỗi khi lấy chi tiết tài khoản có ID {AccountId}", accountId);
+
+                if (ex.Message.Contains("not found"))
+                    return NotFound(ApiResponseFactory.Fail<AccountDetailsDTO>($"Không tìm thấy tài khoản có ID {accountId}"));
+
+                return StatusCode(500, ApiResponseFactory.Fail<AccountDetailsDTO>("Lỗi server khi lấy chi tiết tài khoản"));
             }
         }
 
         [HttpGet("{accountId}/balance")]
-        [ProducesResponseType(typeof(decimal), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<decimal>> GetBalance(int accountId)
+        [ProducesResponseType(typeof(ApiResponse<decimal>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<decimal>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<decimal>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<decimal>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<decimal>), 500)]
+        public async Task<ActionResult<ApiResponse<decimal>>> GetBalance(int accountId)
         {
             try
             {
-                // Get the account to check the user ID
                 var account = await _accountService.GetAccountWithTransactionsAsync(accountId);
 
-                // Ensure user can only access their own account unless they're admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (account.UserId != currentUserId && userRole != "2") // Not own account and not admin
+                if (account.UserId != currentUserId && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
                 var balance = await _accountService.GetBalanceAsync(accountId);
-                return Ok(balance);
+                return Ok(ApiResponseFactory.Success(balance, "Số dư tài khoản được tải thành công"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error retrieving balance for account with ID {0}", accountId));
-                return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
-                    StatusCode(500, new { Message = "An error occurred while retrieving balance" });
+                _logger.LogError(ex, "Lỗi khi lấy số dư tài khoản có ID {AccountId}", accountId);
+
+                if (ex.Message.Contains("not found"))
+                    return NotFound(ApiResponseFactory.Fail<decimal>($"Không tìm thấy tài khoản có ID {accountId}"));
+
+                return StatusCode(500, ApiResponseFactory.Fail<decimal>("Lỗi server khi lấy số dư tài khoản"));
             }
         }
 
         [HttpPost("deposit")]
-        [ProducesResponseType(typeof(TransactionDTO), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<TransactionDTO>> Deposit([FromBody] DepositDTO depositDTO)
+        [ProducesResponseType(typeof(ApiResponse<TransactionDTO>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<TransactionDTO>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<TransactionDTO>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<TransactionDTO>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<TransactionDTO>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<TransactionDTO>), 500)]
+        public async Task<ActionResult<ApiResponse<TransactionDTO>>> Deposit([FromBody] DepositDTO depositDTO)
         {
             try
             {
-                // Validate deposit amount
                 if (depositDTO.Amount <= 0)
                 {
-                    return BadRequest(new { Message = "Deposit amount must be greater than zero" });
+                    return BadRequest(ApiResponseFactory.Fail<TransactionDTO>("Số tiền nạp phải lớn hơn 0"));
                 }
-
-                // Get the account to check the user ID
                 var account = await _accountService.GetAccountWithTransactionsAsync(depositDTO.AccountId);
-
-                // Ensure user can only deposit to their own account unless they're staff or admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (account.UserId != currentUserId && userRole != "1" && userRole != "2") // Not own account and not staff/admin
+                if (account.UserId != currentUserId && !User.IsInRole("1") && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
                 var transaction = await _accountService.DepositAsync(depositDTO);
-                return Ok(transaction);
+                return Ok(ApiResponseFactory.Success(transaction, "Nạp tiền thành công"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error depositing to account with ID {0}", depositDTO.AccountId));
-                return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
-                    BadRequest(new { Message = ex.Message });
+                _logger.LogError(ex, "Lỗi khi nạp tiền vào tài khoản có ID {AccountId}", depositDTO.AccountId);
+
+                if (ex.Message.Contains("not found"))
+                    return NotFound(ApiResponseFactory.Fail<TransactionDTO>($"Không tìm thấy tài khoản có ID {depositDTO.AccountId}"));
+
+                return BadRequest(ApiResponseFactory.Fail<TransactionDTO>("Nạp tiền thất bại: " + ex.Message));
             }
         }
 
         [HttpPost("withdraw")]
-        [Authorize(Roles = "1,2")] // Staff and Admin only
-        [ProducesResponseType(typeof(TransactionDTO), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<TransactionDTO>> Withdraw([FromBody] WithdrawDTO withdrawDTO)
+        [Authorize(Roles = "1,2")]
+        [ProducesResponseType(typeof(ApiResponse<TransactionDTO>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<TransactionDTO>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<TransactionDTO>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<TransactionDTO>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<TransactionDTO>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<TransactionDTO>), 500)]
+        public async Task<ActionResult<ApiResponse<TransactionDTO>>> Withdraw([FromBody] WithdrawDTO withdrawDTO)
         {
             try
             {
-                // Validate withdrawal amount
                 if (withdrawDTO.Amount <= 0)
                 {
-                    return BadRequest(new { Message = "Withdrawal amount must be greater than zero" });
+                    return BadRequest(ApiResponseFactory.Fail<TransactionDTO>("Số tiền rút phải lớn hơn 0"));
                 }
 
                 var transaction = await _accountService.WithdrawAsync(withdrawDTO);
-                return Ok(transaction);
+                return Ok(ApiResponseFactory.Success(transaction, "Rút tiền thành công"));
+            }
+            catch (InsufficientBalanceException ex)
+            {
+                _logger.LogWarning(ex, "Số dư không đủ để rút tiền từ tài khoản có ID {AccountId}", withdrawDTO.AccountId);
+                return BadRequest(ApiResponseFactory.Fail<TransactionDTO>("Số dư không đủ để rút tiền: " + ex.Message));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error withdrawing from account with ID {0}", withdrawDTO.AccountId));
+                _logger.LogError(ex, "Lỗi khi rút tiền từ tài khoản có ID {AccountId}", withdrawDTO.AccountId);
 
                 if (ex.Message.Contains("not found"))
-                    return NotFound(new { Message = ex.Message });
-                else if (ex.Message.Contains("insufficient"))
-                    return BadRequest(new { Message = ex.Message });
-                else
-                    return BadRequest(new { Message = ex.Message });
+                    return NotFound(ApiResponseFactory.Fail<TransactionDTO>($"Không tìm thấy tài khoản có ID {withdrawDTO.AccountId}"));
+
+                return BadRequest(ApiResponseFactory.Fail<TransactionDTO>("Rút tiền thất bại: " + ex.Message));
             }
         }
 
         [HttpGet("{accountId}/transactions")]
-        [ProducesResponseType(typeof(IEnumerable<TransactionDTO>), 200)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(403)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<IEnumerable<TransactionDTO>>> GetTransactions(
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<TransactionDTO>>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<TransactionDTO>>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<TransactionDTO>>), 403)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<TransactionDTO>>), 404)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<TransactionDTO>>), 500)]
+        public async Task<ActionResult<ApiResponse<IEnumerable<TransactionDTO>>>> GetTransactions(
             int accountId,
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
             try
             {
-                // Get the account to check the user ID
                 var account = await _accountService.GetAccountWithTransactionsAsync(accountId);
 
-                // Ensure user can only access their own account unless they're admin
                 var currentUserId = _currentUserService.UserId;
-                var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-                if (account.UserId != currentUserId && userRole != "2") // Not own account and not admin
+                if (account.UserId != currentUserId && !User.IsInRole("2"))
                 {
                     return Forbid();
                 }
 
                 var transactions = await _accountService.GetTransactionsByAccountIdAsync(accountId, pageNumber, pageSize);
-                return Ok(transactions);
+                return Ok(ApiResponseFactory.Success(transactions, "Danh sách giao dịch được tải thành công"));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error retrieving transactions for account with ID {0}", accountId));
-                return ex.Message.Contains("not found") ? NotFound(new { Message = ex.Message }) :
-                    StatusCode(500, new { Message = "An error occurred while retrieving transactions" });
+                _logger.LogError(ex, "Lỗi khi lấy danh sách giao dịch cho tài khoản có ID {AccountId}", accountId);
+
+                if (ex.Message.Contains("not found"))
+                    return NotFound(ApiResponseFactory.Fail<IEnumerable<TransactionDTO>>($"Không tìm thấy tài khoản có ID {accountId}"));
+
+                return StatusCode(500, ApiResponseFactory.Fail<IEnumerable<TransactionDTO>>("Lỗi server khi lấy danh sách giao dịch"));
             }
         }
     }
