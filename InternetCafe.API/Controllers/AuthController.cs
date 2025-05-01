@@ -1,9 +1,12 @@
-﻿using InternetCafe.Application.DTOs.Authentication.Models;
+﻿using InternetCafe.API.Common;
+using InternetCafe.Application.DTOs.Authentication.Models;
 using InternetCafe.Application.Interfaces.Services;
+using InternetCafe.Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 
 namespace InternetCafe.API.Controllers
@@ -24,50 +27,103 @@ namespace InternetCafe.API.Controllers
         }
 
         [HttpPost("login")]
-        [ProducesResponseType(typeof(AuthenticationResponse), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
-        public async Task<ActionResult<AuthenticationResponse>> Login([FromBody] AuthenticationRequest request)
+        [ProducesResponseType(typeof(ApiResponse<AuthenticationResponse>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<AuthenticationResponse>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<AuthenticationResponse>), 401)]
+        [ProducesResponseType(typeof(ApiResponse<AuthenticationResponse>), 404)]
+        public async Task<ActionResult<ApiResponse<AuthenticationResponse>>> Login([FromBody] AuthenticationRequest request)
         {
             try
             {
                 var response = await _authService.AuthenticateAsync(request);
-                return Ok(response);
+                return Ok(new ApiResponse<AuthenticationResponse>
+                {
+                    Success = true,
+                    Message = "Đăng nhập thành công",
+                    Data = response
+                });
+            }
+            catch (UserNotFoundException ex)
+            {
+                _logger.LogWarning(ex, $"Đăng nhập thất bại: Tài khoản {request.Username} không tồn tại");
+                return NotFound(new ApiResponse<AuthenticationResponse>
+                {
+                    Success = false,
+                    Message = "Tài khoản không tồn tại"
+                });
+            }
+            catch (AuthenticationException ex)
+            {
+                _logger.LogWarning(ex, $"Đăng nhập thất bại: Sai thông tin đăng nhập cho tài khoản {request.Username}");
+                return Unauthorized(new ApiResponse<AuthenticationResponse>
+                {
+                    Success = false,
+                    Message = "Thông tin đăng nhập không chính xác"
+                });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Error during login for user {0}", request.Username));
-                return ex.Message.Contains("not found") ? NotFound(ex.Message) :
-                       Unauthorized(new { Message = "Invalid credentials" });
+                _logger.LogError(ex, $"Lỗi đăng nhập cho tài khoản {request.Username}");
+                return BadRequest(new ApiResponse<AuthenticationResponse>
+                {
+                    Success = false,
+                    Message = "Đăng nhập không thành công"
+                });
             }
         }
 
         [HttpPost("refresh")]
-        [ProducesResponseType(typeof(AuthenticationResponse), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
-        public async Task<ActionResult<AuthenticationResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
+        [ProducesResponseType(typeof(ApiResponse<AuthenticationResponse>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<AuthenticationResponse>), 400)]
+        [ProducesResponseType(typeof(ApiResponse<AuthenticationResponse>), 401)]
+        public async Task<ActionResult<ApiResponse<AuthenticationResponse>>> RefreshToken([FromBody] RefreshTokenRequest request)
         {
             try
             {
                 var response = await _authService.RefreshTokenAsync(request);
-                return Ok(response);
+                return Ok(new ApiResponse<AuthenticationResponse>
+                {
+                    Success = true,
+                    Message = "Làm mới token thành công",
+                    Data = response
+                });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error refreshing token");
-                return Unauthorized(new { Message = "Invalid token" });
+                _logger.LogError(ex, "Lỗi làm mới token");
+                return Unauthorized(new ApiResponse<AuthenticationResponse>
+                {
+                    Success = false,
+                    Message = "Token không hợp lệ"
+                });
             }
         }
 
         [Authorize]
         [HttpPost("logout")]
-        [ProducesResponseType(200)]
-        public ActionResult Logout()
+        [ProducesResponseType(typeof(ApiResponse<bool>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<bool>), 401)]
+        public ActionResult<ApiResponse<bool>> Logout()
         {
-            // Since JWT is stateless, there's no server-side session to terminate
-            // Client should remove the token from storage
-            return Ok(new { Message = "Logged out successfully" });
+            try
+            {
+                // JWT là stateless, nên logout chỉ đơn giản là thông báo thành công
+                return Ok(new ApiResponse<bool>
+                {
+                    Success = true,
+                    Message = "Đăng xuất thành công",
+                    Data = true
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi đăng xuất");
+                return Unauthorized(new ApiResponse<bool>
+                {
+                    Success = false,
+                    Message = "Đăng xuất không thành công"
+                });
+            }
         }
     }
 }
